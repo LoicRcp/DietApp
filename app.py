@@ -16,7 +16,17 @@ items = [
     {"id": '007', "name": "Banana", "calories": 80, "proteins": 1},
 ]
 
+@app.route('/scan', methods=['GET', 'POST'])
+def scan():
 
+    return render_template('scan.html')
+
+
+@app.route('/scan-barcode', methods=['POST'])
+def scan_barcode():
+    # Read the image
+    print("Scanning barcode...")
+    print(request.files)
 @app.route("/", methods=["GET", "POST"])
 def index():
     return render_template("index.html", items=items)

@@ -16,9 +16,15 @@
       height: 100vh;
     }
 
+    @media (min-width: 768px){
+    .container, .container-md, .container-sm {
+        max-width: 100%;
+    }
+
     /* Make the table width responsive */
     .table-responsive {
       width: 100%;
+        height: 100%;
       overflow-x: auto;
     }
 
@@ -151,31 +157,28 @@
         });
         console.log(tableData);
         var xhr = new XMLHttpRequest();
-      xhr.open('POST', '/my-flask-route');
-      xhr.setRequestHeader('Content-Type', 'application/json');
-      xhr.onload = function() {
-
-          var data = JSON.parse(xhr.responseText);
+        xhr.open('POST', '/my-flask-route');
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.onload = function() {
+            var data = JSON.parse(xhr.responseText);
             populateTable(data);
-
-
-          };
+        };
       xhr.send(JSON.stringify(tableData));
     }
 
     function populateTable(data){
-         var table = document.getElementById('table2');
-  var tbody = table.getElementsByTagName('tbody')[0];
-  tbody.innerHTML = '';
-  for (var i = 0; i < data.length; i++) {
-    var item = data[i];
-    var row = '<tr><td>' + item.name + '</td><td>' + item.calories + '</td><td>' + item.proteins + '</td></tr>';
-    tbody.insertAdjacentHTML('beforeend', row);
-  }
+        var table = document.getElementById('table2');
+        var tbody = table.getElementsByTagName('tbody')[0];
+        tbody.innerHTML = '';
+        for (var i = 0; i < data.length; i++) {
+            var item = data[i];
+            var row = '<tr><td>' + item.name + '</td><td>' + item.calories + '</td><td>' + item.proteins + '</td></tr>';
+            tbody.insertAdjacentHTML('beforeend', row);
+        }
     }
 
-      document.getElementById('submit-button').addEventListener('click', function(){
-          console.log('clicked');
+    document.getElementById('submit-button').addEventListener('click', function(){
+        console.log('clicked');
         sendData();
       });
 
