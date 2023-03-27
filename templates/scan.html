@@ -1,87 +1,114 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-      <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-      <title>Scan Barcode</title>
-      <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-      <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-      <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+    <title>Scan Barcode</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
     <!-- Bootstrap CSS -->
-  </head>
-  <body>
-    <div class="container mt-5">
-      <div class="row justify-content-center">
+</head>
+<body>
+<div class="container mt-5">
+    <div class="row justify-content-center">
         <div class="col-md-6">
-          <h1 class="text-center mb-4">Scan Barcode</h1>
-          <div class="card">
-            <div class="card-body">
-              <div id="reader"></div>
+            <h1 class="text-center mb-4">Scan Barcode</h1>
+            <div class="card">
+                <div class="card-body">
+                    <div id="reader"></div>
+                </div>
             </div>
-              <div id="result" style="display: none">
-                  <table class="table">
-                      <thead>
-                        <tr>
-                          <th>Name</th>
-                          <th>Portion</th>
-                          <th>Calories</th>
-                          <th>Proteins</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td id="name"></td>
-                          <td id="portion"></td>
-                          <td id="calories"></td>
-                          <td id="proteins"></td>
-                        </tr>
-                      </tbody>
-                    </table>
-              </div>
-          </div>
-          <div class="text-center mt-3">
-            <button class="btn btn-primary" onclick="scanBarcode()">Scan</button>
-          </div>
+            <div class="text-center mt-3">
+                <button class="btn btn-primary" onclick="scanBarcode()">Scan</button>
+            </div>
         </div>
-      </div>
+        <div id="result" style="display: none">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Quantity</th>
+                        <th>Calories</th>
+                        <th>Proteins</th>
+                        <th>Fats</th>
+                        <th>Carbs</th>
+                        <th>Sugars</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td id="name"></td>
+                        <td id="quantity"></td>
+                        <td id="calories"></td>
+                        <td id="proteins"></td>
+                        <td id="fats"></td>
+                        <td id="carbs"></td>
+                        <td id="sugars"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="resultError" style="display: none">
+                <p>Product not found</p>
+            </div>
     </div>
+</div>
 
-    <!-- Bootstrap Bundle with Popper -->
 
-    <script>
-        function onScanSuccess(decodedText, decodedResult) {
-          console.log(`Code matched = ${decodedText}`, decodedResult);
-          html5QrcodeScanner.clear();
+<!-- Bootstrap Bundle with Popper -->
+<!-- TODO: after successful scan, add delete button -->
+<script>
+    function onScanSuccess(decodedText, decodedResult) {
+        console.log(`Code matched = ${decodedText}`, decodedResult);
+        html5QrcodeScanner.clear();
 
-          var xhr = new XMLHttpRequest();
-          xhr.open('POST', '/scan-barcode');
-          xhr.setRequestHeader('Content-Type', 'application/json');
-          xhr.onload = function() {
-              const result = { Name: "Chicken Breast", Portion: "100g", Calories: 200, Proteins: 30 };
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/scan-barcode');
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.onload = function () {
+            result = JSON.parse(xhr.responseText);
+            if (result['status'] == 1) {
+                let errorElem = document.getElementById("resultError");
+                errorElem.style.display = "block";
+                errorElem.innerHTML = "Le produit n'as pas été trouvé. Vous pouvez l'ajouter en cliquant sur le lien suivant: <a href='https://fr.openfoodfacts.org/contribuer'>Ajouter un produit</a>";
+            } else {
+                if (result['status'] == 0) {
+                    let errorElem = document.getElementById("resultError");
+                    errorElem.style.display = "block";
+                    errorElem.innerHTML = "Le produit est incomplet. Vous pouvez le compléter en cliquant sur le lien suivant: <a href='https://fr.openfoodfacts.org/produit/" + result['code'] + "/'>Compléter un produit</a>" +
+                        "<br>Voici ce qu'il manque: <br>" + result['errorMess'];
 
-              document.getElementById("name").innerHTML = result.Name;
-              document.getElementById("portion").innerHTML = result.Portion;
-              document.getElementById("calories").innerHTML = result.Calories;
-              document.getElementById("proteins").innerHTML = result.Proteins;
+                }
+                console.log(result)
+                document.getElementById("name").innerHTML = result['product']['name'];
+                document.getElementById("quantity").innerHTML = result['product']['quantity'];
+                document.getElementById("calories").innerHTML = result['product']['calories'];
+                document.getElementById("proteins").innerHTML = result['product']['proteins'];
+                document.getElementById("fats").innerHTML = result['product']['fats'];
+                document.getElementById("carbs").innerHTML = result['product']['carbohydrates'];
+                document.getElementById("sugars").innerHTML = result['product']['sugars'];
+                document.getElementById("result").style.display = "block";
+            }
 
-              document.getElementById("result").style.display = "block";
-          }
-          xhr.send(JSON.stringify(decodedText));
         }
+        xhr.send(JSON.stringify(decodedText));
+    }
 
-        function scanBarcode() {
-            document.getElementById("result").style.display = "none";
+    function scanBarcode() {
+        document.getElementById("result").style.display = "none";
+        document.getElementById("resultError").style.display = "none";
 
-            html5QrcodeScanner.render(onScanSuccess);
-        }
+        html5QrcodeScanner.render(onScanSuccess);
+    }
 
-        let html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
+    let html5QrcodeScanner = new Html5QrcodeScanner("reader", {fps: 10, qrbox: {width: 250, height: 250}}, false);
 
 
-    </script>
+</script>
 
-  </body>
+</body>
 </html>

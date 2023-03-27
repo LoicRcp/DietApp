@@ -99,7 +99,7 @@
       <thead>
         <tr>
           <th scope="col">Name</th>
-          <th scope="col">Portion</th>
+          <th scope="col">Quantity</th>
           <th scope="col">Calories</th>
         </tr>
       </thead>
@@ -107,7 +107,7 @@
         {% for item in data %}
         <tr>
           <td>{{ item.name }}</td>
-          <td>{{ item.portion }}</td>
+          <td>{{ item.quantity }}</td>
           <td>{{ item.calories }}</td>
         </tr>
         {% endfor %}

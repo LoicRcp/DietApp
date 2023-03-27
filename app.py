@@ -2,9 +2,9 @@ import logging
 from logging import INFO
 from logging.handlers import RotatingFileHandler
 from os import path
+import re
 
-import cv2
-from pyzbar import pyzbar
+import requests
 from flask import Flask, render_template, request
 import sqlite3
 
@@ -24,13 +24,13 @@ if not app_log.hasHandlers():
 
 
 ## Initialize the Database
-conn = sqlite3.connect('database.db')
+conn = sqlite3.connect('database.db', check_same_thread=False)
 cursor = conn.cursor()
 
 cursor.execute("""CREATE TABLE IF NOT EXISTS products(
-barcode INTEGER PRIMARY KEY,
+barcode INTEGER PRIMARY KEY UNIQUE,
 name TEXT, 
-portion INTEGER, 
+quantity INTEGER, 
 measure TEXT,
 calories INTEGER,
 fats INTEGER,
@@ -58,17 +58,104 @@ items = [
     {"id": '007', "name": "Banana", "calories": 80, "proteins": 1},
 ]
 
-@app.route('/scan', methods=['GET', 'POST'])
-def scan():
+def productToJson(product):
+    return {
+        "barcode": product[0],
+        "name": product[1],
+        "quantity": product[2],
+        "measure": product[3],
+        "calories": product[4],
+        "fats": product[5],
+        "saturated_fats": product[6],
+        "carbohydrates": product[7],
+        "sugars": product[8],
+        "proteins": product[9],
+        "salt": product[10],
+        "fiber": product[11]
+    }
+def checkExistanceInDatabase(barcode):
+    cursor.execute("SELECT * FROM products WHERE barcode = ?", (barcode,))
+    return cursor.fetchone()
 
-    return render_template('scan.html')
+def addProductInDatabase(product):
+    cursor.execute("INSERT INTO products VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", tuple(product))
+    conn.commit()
+def getProductFromExternalApi(barcode):
+    productJson = requests.get(f"https://world.openfoodfacts.org/api/v0/product/{barcode}.json").json()
+    if productJson["status"] == 1:
+        try:
+            temp = re.compile("([0-9]+)([a-zA-Z]+)")
+            quantity = productJson.get("product").get("quantity")
+            quantity = temp.match(quantity).groups()
+            product = [
+            productJson.get("code"),
+            productJson.get("product").get("product_name"),
+            quantity[0],
+            quantity[1],
+            productJson.get("product").get("nutriments").get("energy-kcal_100g"),
+            productJson.get("product").get("nutriments").get("fat_100g"),
+            productJson.get("product").get("nutriments").get("saturated-fat_100g"),
+            productJson.get("product").get("nutriments").get("carbohydrates_100g"),
+            productJson.get("product").get("nutriments").get("sugars_100g"),
+            productJson.get("product").get("nutriments").get("proteins_100g"),
+            productJson.get("product").get("nutriments").get("salt_100g"),
+            productJson.get("product").get("nutriments").get("fiber_100g")]
+            return product
+        except Exception as e:
+            print(e)
+    else:
+        return None
+
 
 
 @app.route('/scan-barcode', methods=['POST'])
 def scan_barcode():
-    # Read the image
-    print("Scanning barcode...")
-    print(request.files)
+    barcode = request.get_json()
+    product = checkExistanceInDatabase(int(barcode))
+    if product:
+        jsonToReturn = {"product": productToJson(product), "fromDb": True, "status": -1,
+                        'code': product[0], "errorMess": None}
+        return jsonToReturn
+    else:
+        product = getProductFromExternalApi(barcode)
+        if product == None:
+            jsonToReturn = {
+                "status": 1,
+            }
+            return jsonToReturn
+        else:
+            errorMess = ""
+            if None in product:
+                ## C'est DEGEULASSE mais j'ai rien de mieux en tête qui prendrait pas une plombe
+                if product[1] == None:
+                    errorMess += "Name, "
+                if product[2] == None:
+                    errorMess += "Quantity, "
+                if product[3] == None:
+                    errorMess += "Measure, "
+                if product[4] == None:
+                    errorMess += "Calories, "
+                if product[5] == None:
+                    errorMess += "Fats, "
+                if product[6] == None:
+                    errorMess += "Saturated fats, "
+                if product[7] == None:
+                    errorMess += "Carbohydrates, "
+                if product[8] == None:
+                    errorMess += "Sugars, "
+                if product[9] == None:
+                    errorMess += "Proteins, "
+                if product[10] == None:
+                    errorMess += "Salt, "
+                if product[11] == None:
+                    errorMess += "Fiber, "
+            addProductInDatabase(product)
+            jsonToReturn = {"product": productToJson(product), "fromDb": False, "status": 0 if errorMess != None else -1, 'code': product[0], "errorMess": errorMess}
+            return jsonToReturn
+
+@app.route('/scan', methods=['GET', 'POST'])
+def scan():
+    return render_template('scan.html')
 @app.route("/", methods=["GET", "POST"])
 def index():
     return render_template("index.html", items=items)
