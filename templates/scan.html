@@ -44,8 +44,6 @@
           </div>
           <div class="text-center mt-3">
             <button class="btn btn-primary" onclick="scanBarcode()">Scan</button>
-              <button type="button" class="btn btn-primary" id="take-picture-button">Take Picture</button>
-
           </div>
         </div>
       </div>
@@ -69,7 +67,7 @@
               document.getElementById("calories").innerHTML = result.Calories;
               document.getElementById("proteins").innerHTML = result.Proteins;
 
-                document.getElementById("result").style.display = "block";
+              document.getElementById("result").style.display = "block";
           }
           xhr.send(JSON.stringify(decodedText));
 
@@ -79,9 +77,15 @@
 
         }
 
-        let html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250} },
-          /* verbose= */ false);
-        html5QrcodeScanner.render(onScanSuccess);
+        function scanBarcode() {
+            document.getElementById("result").style.display = "none";
+
+            html5QrcodeScanner.render(onScanSuccess);
+        }
+
+        let html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
+
+
     </script>
 
   </body>
