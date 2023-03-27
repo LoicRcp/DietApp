@@ -156,8 +156,16 @@ def scan_barcode():
 @app.route('/scan', methods=['GET', 'POST'])
 def scan():
     return render_template('scan.html')
+def getAllProductsFromDatabase():
+    cursor.execute("SELECT * FROM products")
+    products = cursor.fetchall()
+    return products
+
+
 @app.route("/", methods=["GET", "POST"])
 def index():
+    items = getAllProductsFromDatabase()
+    items = [productToJson(item) for item in items]
     return render_template("index.html", items=items)
 
 
