@@ -1,6 +1,48 @@
+import logging
+from logging import INFO
+from logging.handlers import RotatingFileHandler
+from os import path
+
 import cv2
 from pyzbar import pyzbar
 from flask import Flask, render_template, request
+import sqlite3
+
+
+## Initialize the loggers
+
+logFile = f"{path.dirname(path.realpath(__file__))}/dietApp.log"
+
+logHandler = RotatingFileHandler(logFile, mode="a", maxBytes=200*1024*1024, backupCount=1, encoding="utf-8")
+logHandler.setLevel(INFO)
+logHandler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(funcName)s(%(lineno)d) - %(message)s"))
+
+app_log = logging.getLogger('root')
+app_log.setLevel(logging.INFO)
+if not app_log.hasHandlers():
+    app_log.addHandler(logHandler)
+
+
+## Initialize the Database
+conn = sqlite3.connect('database.db')
+cursor = conn.cursor()
+
+cursor.execute("""CREATE TABLE IF NOT EXISTS products(
+barcode INTEGER PRIMARY KEY,
+name TEXT, 
+portion INTEGER, 
+measure TEXT,
+calories INTEGER,
+fats INTEGER,
+saturated_fats INTEGER,
+carbohydrates INTEGER,
+sugars INTEGER,
+proteins INTEGER,
+salt INTEGER,
+fiber INTEGER)""")
+
+conn.commit()
+## Initialize the Flask app
 
 app = Flask(__name__)
 
