@@ -14,6 +14,9 @@
 </head>
 <body>
 <div class="container mt-5">
+     <div id="informations" style="display: none">
+                <p>Product not found</p>
+            </div>
     <div class="row justify-content-center">
         <div class="col-md-6">
             <h1 class="text-center mb-4">Scan Barcode</h1>
@@ -25,7 +28,9 @@
             <div class="text-center mt-3">
                 <button class="btn btn-primary" onclick="scanBarcode()">Scan</button>
             </div>
-        </div>
+            <div class="text-center mt-3">
+                <button class="btn btn-primary" id="deletebtn" onclick="deleteProduct()">Delete</button>
+            </div>
         <div id="result" style="display: none">
                 <table class="table">
                     <thead>
@@ -52,9 +57,6 @@
                     </tbody>
                 </table>
             </div>
-            <div id="resultError" style="display: none">
-                <p>Product not found</p>
-            </div>
     </div>
 </div>
 
@@ -62,6 +64,30 @@
 <!-- Bootstrap Bundle with Popper -->
 <!-- TODO: after successful scan, add delete button -->
 <script>
+    barcode = null;
+    function deleteProduct(){
+        if (barcode != null){
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/delete-product");
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.onload = function (){
+                result = JSON.parse(xhr.responseText);
+                if (result['status'] === "1"){
+                    document.getElementById("result").style.display = "none";
+                    document.getElementById("deletebtn").style.display = "none";
+                    document.getElementById("informations").style.display = "block";
+                    document.getElementById("informations").innerHTML = "Le produit a bien été supprimé";
+                } else {
+                    document.getElementById("informations").style.display = "block";
+                    document.getElementById("informations").innerHTML = "Le produit n'a pas pu être supprimé. Erreur: " + xhr['status'];
+                }
+            }
+            xhr.send(JSON.stringify(barcode));
+
+        }
+    }
+
+
     function onScanSuccess(decodedText, decodedResult) {
         console.log(`Code matched = ${decodedText}`, decodedResult);
         html5QrcodeScanner.clear();
@@ -72,12 +98,12 @@
         xhr.onload = function () {
             result = JSON.parse(xhr.responseText);
             if (result['status'] == 1) {
-                let errorElem = document.getElementById("resultError");
+                let errorElem = document.getElementById("informations");
                 errorElem.style.display = "block";
                 errorElem.innerHTML = "Le produit n'as pas été trouvé. Vous pouvez l'ajouter en cliquant sur le lien suivant: <a href='https://fr.openfoodfacts.org/contribuer'>Ajouter un produit</a>";
             } else {
                 if (result['status'] == 0) {
-                    let errorElem = document.getElementById("resultError");
+                    let errorElem = document.getElementById("informations");
                     errorElem.style.display = "block";
                     errorElem.innerHTML = "Le produit est incomplet. Vous pouvez le compléter en cliquant sur le lien suivant: <a href='https://fr.openfoodfacts.org/produit/" + result['code'] + "/'>Compléter un produit</a>" +
                         "<br>Voici ce qu'il manque: <br>" + result['errorMess'];
@@ -92,6 +118,7 @@
                 document.getElementById("carbs").innerHTML = result['product']['carbohydrates'];
                 document.getElementById("sugars").innerHTML = result['product']['sugars'];
                 document.getElementById("result").style.display = "block";
+                document.getElementById("deletebtn").style.display = "block";
             }
 
         }
@@ -100,7 +127,8 @@
 
     function scanBarcode() {
         document.getElementById("result").style.display = "none";
-        document.getElementById("resultError").style.display = "none";
+        document.getElementById("informations").style.display = "none";
+        document.getElementById("deletebtn").style.display = "none";
 
         html5QrcodeScanner.render(onScanSuccess);
     }

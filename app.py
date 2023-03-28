@@ -77,6 +77,13 @@ def checkExistanceInDatabase(barcode):
     cursor.execute("SELECT * FROM products WHERE barcode = ?", (barcode,))
     return cursor.fetchone()
 
+def deleteProductFromDatabase(barcode):
+    try:
+        cursor.execute("DELETE FROM products WHERE barcode = ?", (barcode,))
+        conn.commit()
+        return None
+    except Exception as e:
+        return e
 def addProductInDatabase(product):
     cursor.execute("INSERT INTO products VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", tuple(product))
     conn.commit()
@@ -89,7 +96,7 @@ def getProductFromExternalApi(barcode):
             quantity = temp.match(quantity).groups()
             product = [
             productJson.get("code"),
-            productJson.get("product").get("product_name"),
+            productJson.get("product").get("product_name_fr") + " - " + productJson.get("product").get("brands"),
             quantity[0],
             quantity[1],
             productJson.get("product").get("nutriments").get("energy-kcal_100g"),
@@ -106,7 +113,14 @@ def getProductFromExternalApi(barcode):
     else:
         return None
 
-
+@app.route('/delete-product', methods=['POST'])
+def delete_product():
+    barcode = request.get_json()
+    response = deleteProductFromDatabase(barcode)
+    if response == None:
+        return {"status": 1}
+    else:
+        return {"status": response}
 
 @app.route('/scan-barcode', methods=['POST'])
 def scan_barcode():
