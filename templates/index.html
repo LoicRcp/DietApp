@@ -77,7 +77,7 @@
                   <td><input type="number" name="quantity" value="0" min="0" max="100"></td>
                   <td style="display: none">{{ item.barcode }}</td>
                   <td>{{ item.name }}</td>
-                  <td>{{ item.quantity }}</td>
+                  <td>{{ item.quantity }}{{ item.measure }}</td>
                   <td>{{ item.calories }}</td>
                   <td>{{ item.proteins }}</td>
                   <td>{{ item.fats }}</td>
@@ -105,24 +105,22 @@
       <div class="form-group">
     <button id="submit-button" type="button" class="btn btn-primary">Validate</button>
       </div>
-    <table id="table2" class="table">
-      <thead>
-        <tr>
-          <th scope="col">Name</th>
-          <th scope="col">Quantity</th>
-          <th scope="col">Calories</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for item in data %}
-        <tr>
-          <td>{{ item.name }}</td>
-          <td>{{ item.quantity }}</td>
-          <td>{{ item.calories }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+      <table class="table table-striped" id="result-table">
+          <thead>
+          <tr>
+              <th></th>
+              <th>Name</th>
+              <th>Quantity</th>
+              <th>Calories</th>
+              <th>Proteins</th>
+              <th>Fats</th>
+              <th>Carbs</th>
+              <th>Sugars</th>
+          </tr>
+          </thead>
+          <tbody>
+          </tbody>
+      </table>
     </div>
   </div>
 </body>
@@ -166,23 +164,30 @@
         });
         console.log(tableData);
         var xhr = new XMLHttpRequest();
-        xhr.open('POST', '/my-flask-route');
+        xhr.open('POST', '/get-meal-plan');
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.onload = function() {
             var data = JSON.parse(xhr.responseText);
-            populateTable(data);
+            populateResultTable(data);
         };
       xhr.send(JSON.stringify(tableData));
     }
 
-    function populateTable(data){
-        var table = document.getElementById('table2');
-        var tbody = table.getElementsByTagName('tbody')[0];
-        tbody.innerHTML = '';
-        for (var i = 0; i < data.length; i++) {
-            var item = data[i];
-            var row = '<tr><td>' + item.name + '</td><td>' + item.calories + '</td><td>' + item.proteins + '</td></tr>';
-            tbody.insertAdjacentHTML('beforeend', row);
+    function populateResultTable(result) {
+
+        // For each product in products, create a row in the table "result-table" with the product information
+        for (var i = 0; i < result.length; i++) {
+            console.log(result[i])
+            var table = document.getElementById("result-table");
+            var row = table.insertRow(1);
+            row.insertCell(0).innerHTML = result[i]['number'];
+            row.insertCell(1).innerHTML = result[i]['name'];
+            row.insertCell(2).innerHTML = result[i]['quantity'] + result[i]['measure'];
+            row.insertCell(3).innerHTML = result[i]['calories'];
+            row.insertCell(4).innerHTML = result[i]['proteins'];
+            row.insertCell(5).innerHTML = result[i]['fats'];
+            row.insertCell(6).innerHTML = result[i]['carbohydrates'];
+            row.insertCell(7).innerHTML = result[i]['sugars'];
         }
     }
 

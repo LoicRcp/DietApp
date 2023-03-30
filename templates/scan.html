@@ -62,7 +62,6 @@
 
 
 <!-- Bootstrap Bundle with Popper -->
-<!-- TODO: after successful scan, add delete button -->
 <script>
     barcode = null;
     function deleteProduct(){
@@ -72,14 +71,14 @@
             xhr.setRequestHeader('Content-Type', 'application/json');
             xhr.onload = function (){
                 result = JSON.parse(xhr.responseText);
-                if (result['status'] === "1"){
+                if (result['status'] === 1){
                     document.getElementById("result").style.display = "none";
                     document.getElementById("deletebtn").style.display = "none";
                     document.getElementById("informations").style.display = "block";
                     document.getElementById("informations").innerHTML = "Le produit a bien été supprimé";
                 } else {
                     document.getElementById("informations").style.display = "block";
-                    document.getElementById("informations").innerHTML = "Le produit n'a pas pu être supprimé. Erreur: " + xhr['status'];
+                    document.getElementById("informations").innerHTML = "Le produit n'a pas pu être supprimé. Erreur: " + result['status'];
                 }
             }
             xhr.send(JSON.stringify(barcode));
@@ -102,6 +101,7 @@
                 errorElem.style.display = "block";
                 errorElem.innerHTML = "Le produit n'as pas été trouvé. Vous pouvez l'ajouter en cliquant sur le lien suivant: <a href='https://fr.openfoodfacts.org/contribuer'>Ajouter un produit</a>";
             } else {
+                barcode = result['code'];
                 if (result['status'] == 0) {
                     let errorElem = document.getElementById("informations");
                     errorElem.style.display = "block";
@@ -111,7 +111,7 @@
                 }
                 console.log(result)
                 document.getElementById("name").innerHTML = result['product']['name'];
-                document.getElementById("quantity").innerHTML = result['product']['quantity'];
+                document.getElementById("quantity").innerHTML = result['product']['quantity'] + result['product']['measure'];
                 document.getElementById("calories").innerHTML = result['product']['calories'];
                 document.getElementById("proteins").innerHTML = result['product']['proteins'];
                 document.getElementById("fats").innerHTML = result['product']['fats'];

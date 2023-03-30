@@ -1,3 +1,4 @@
+import json
 import logging
 from logging import INFO
 from logging.handlers import RotatingFileHandler
@@ -164,16 +165,18 @@ def scan_barcode():
                 if product[11] == None:
                     errorMess += "Fiber, "
             addProductInDatabase(product)
-            jsonToReturn = {"product": productToJson(product), "fromDb": False, "status": 0 if errorMess != None else -1, 'code': product[0], "errorMess": errorMess}
+            jsonToReturn = {"product": productToJson(product), "fromDb": False, "status": 0 if errorMess != "" else -1, 'code': product[0], "errorMess": errorMess}
             return jsonToReturn
 
-@app.route('/scan', methods=['GET', 'POST'])
-def scan():
-    return render_template('scan.html')
 def getAllProductsFromDatabase():
     cursor.execute("SELECT * FROM products")
     products = cursor.fetchall()
     return products
+
+@app.route('/scan', methods=['GET', 'POST'])
+def scan():
+    return render_template('scan.html')
+
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -183,13 +186,15 @@ def index():
     return render_template("index.html", items=items)
 
 
-@app.route('/my-flask-route', methods=['POST'])
+@app.route('/get-meal-plan', methods=['POST'])
 def my_flask_route_2():
-    # Retrieve data from the database or wherever it's stored
     data = request.get_json()
-    print(data)
-    # Render the template with the data
-    return data
+
+
+    responseData = []
+    for i in range(len(data)-1):
+        responseData.append(productToJson(checkExistanceInDatabase(data[i]['id'])))
+    return json.dumps(responseData)
 
 if __name__ == '__main__':
     app.run(debug=True)
