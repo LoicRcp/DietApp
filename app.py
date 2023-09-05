@@ -1,5 +1,6 @@
 import json
 import logging
+import sys
 from logging import INFO
 from logging.handlers import RotatingFileHandler
 from os import path
@@ -93,7 +94,7 @@ def getProductFromExternalApi(barcode):
     if productJson["status"] == 1:
         try:
             temp = re.compile("([0-9]+)([a-zA-Z]+)")
-            quantity = productJson.get("product").get("quantity")
+            quantity = productJson.get("product").get("quantity").replace(" ", "")
             quantity = temp.match(quantity).groups()
             product = [
             productJson.get("code"),
@@ -110,7 +111,8 @@ def getProductFromExternalApi(barcode):
             productJson.get("product").get("nutriments").get("fiber_100g")]
             return product
         except Exception as e:
-            print(e)
+            app_log.error(f"Error while getting product from external API: {e}")
+            app_log.error("Error on line {}".format(sys.exc_info()[-1].tb_lineno))
     else:
         return None
 
