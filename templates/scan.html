@@ -11,12 +11,24 @@
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
     <!-- Bootstrap CSS -->
+
+    <style>
+        .result {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+
+    </style>
+
 </head>
 <body>
 <div class="container mt-5">
-     <div id="informations" style="display: none">
-                <p>Product not found</p>
-            </div>
+    <div id="informations" style="display: none">
+        <p>Product not found</p>
+    </div>
     <div class="row justify-content-center">
         <div class="col-md-6">
             <h1 class="text-center mb-4">Scan Barcode</h1>
@@ -31,47 +43,49 @@
             <div class="text-center mt-3">
                 <button class="btn btn-primary" id="deletebtn" onclick="deleteProduct()">Delete</button>
             </div>
-        <div id="result" style="display: none">
-                <table class="table">
-                    <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Quantity</th>
-                        <th>Calories</th>
-                        <th>Proteins</th>
-                        <th>Fats</th>
-                        <th>Carbs</th>
-                        <th>Sugars</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr>
-                        <td id="name"></td>
-                        <td id="quantity"></td>
-                        <td id="calories"></td>
-                        <td id="proteins"></td>
-                        <td id="fats"></td>
-                        <td id="carbs"></td>
-                        <td id="sugars"></td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
+        </div>
+        <div id="result" class="result" style="display: none">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Quantity</th>
+                    <th>Calories</th>
+                    <th>Proteins</th>
+                    <th>Fats</th>
+                    <th>Carbs</th>
+                    <th>Sugars</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td id="name"></td>
+                    <td id="quantity"></td>
+                    <td id="calories"></td>
+                    <td id="proteins"></td>
+                    <td id="fats"></td>
+                    <td id="carbs"></td>
+                    <td id="sugars"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
     </div>
 </div>
-
 
 <!-- Bootstrap Bundle with Popper -->
 <script>
     barcode = null;
-    function deleteProduct(){
-        if (barcode != null){
+
+    function deleteProduct() {
+        if (barcode != null) {
             var xhr = new XMLHttpRequest();
             xhr.open("POST", "/delete-product");
             xhr.setRequestHeader('Content-Type', 'application/json');
-            xhr.onload = function (){
+            xhr.onload = function () {
                 result = JSON.parse(xhr.responseText);
-                if (result['status'] === 1){
+                if (result['status'] === 1) {
                     document.getElementById("result").style.display = "none";
                     document.getElementById("deletebtn").style.display = "none";
                     document.getElementById("informations").style.display = "block";
