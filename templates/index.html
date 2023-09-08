@@ -61,6 +61,8 @@
             transform: scale(1.5);
         }
 
+        .item_name {
+            cursor: help;
         }
     </style>
 </head>
@@ -71,7 +73,7 @@
             <thead>
             <tr>
                 <th></th>
-                <th>Name</th>
+                <th class="item_name" title="Click on a row to copy the barcode">Name</th>
                 <th>Quantity</th>
                 <th>Calories</th>
                 <th>Proteins</th>
@@ -86,16 +88,16 @@
                 <tr>
                     <td><input type="number" name="quantity" value="0" min="0" max="100"></td>
                     <td style="display: none">{{ item.barcode }}</td>
-                    <td>{{ item.name }}</td>
+                    <td title="{{ item.barcode }}">{{ item.name }}</td>
                     <td>{{ item.quantity }}{{ item.measure }}</td>
                     <td>{{ item.calories }}</td>
                     <td>{{ item.proteins }}</td>
                     <td>{{ item.fats }}</td>
                     <td>{{ item.carbohydrates }}</td>
                     <td>{{ item.sugars }}</td>
-
                 </tr>
             {% endfor %}
+
             </tbody>
         </table>
         <div class="row">
@@ -211,6 +213,17 @@
         console.log('clicked');
         sendData();
     });
+
+    // When i click on a row, the barcode is copied to the clipboard
+    document.addEventListener('click', function (event) {
+        var isClickInside = document.getElementById("my-table").contains(event.target);
+        if (isClickInside) {
+            var clickedElement = event.target;
+            var barcode = clickedElement.title;
+            navigator.clipboard.writeText(barcode);
+            alert("Barcode copied to clipboard")
+        }
+    }, false);
 
 
 </script>
