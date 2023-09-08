@@ -44,7 +44,7 @@
                 <button class="btn btn-primary" onclick="scanBarcode()">Scan</button>
             </div>
             <div class="text-center mt-3">
-                <input type="text" id="manualBarcode" placeholder="Enter Barcode">
+                <label for="manualBarcode"></label><input type="text" id="manualBarcode" placeholder="Enter Barcode">
                 <button class="btn btn-primary" onclick="scanManualBarcode()">Scan Manually</button>
             </div>
             <div class="text-center mt-3">
@@ -117,13 +117,13 @@
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.onload = function () {
             result = JSON.parse(xhr.responseText);
-            if (result['status'] == 1) {
+            if (result['status'] === 1) {
                 let errorElem = document.getElementById("informations");
                 errorElem.style.display = "block";
                 errorElem.innerHTML = "Le produit n'as pas été trouvé. Vous pouvez l'ajouter en cliquant sur le lien suivant: <a href='https://fr.openfoodfacts.org/contribuer'>Ajouter un produit</a>";
             } else {
                 barcode = result['code'];
-                if (result['status'] == 0) {
+                if (result['status'] === 0) {
                     let errorElem = document.getElementById("informations");
                     errorElem.style.display = "block";
                     errorElem.innerHTML = "Le produit est incomplet. Vous pouvez le compléter en cliquant sur le lien suivant: <a href='https://fr.openfoodfacts.org/produit/" + result['code'] + "/'>Compléter un produit</a>" +

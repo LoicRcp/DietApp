@@ -86,7 +86,9 @@
 
             {% for item in items %}
                 <tr>
-                    <td><input type="number" name="quantity" value="0" min="0" max="100"></td>
+                    <td><label>
+                        <input type="number" name="quantity" value="0" min="0" max="100">
+                    </label></td>
                     <td style="display: none">{{ item.barcode }}</td>
                     <td title="{{ item.barcode }}">{{ item.name }}</td>
                     <td>{{ item.quantity }}{{ item.measure }}</td>

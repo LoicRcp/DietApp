@@ -10,12 +10,11 @@ import requests
 from flask import Flask, render_template, request
 import sqlite3
 
-
 ## Initialize the loggers
 
 logFile = f"{path.dirname(path.realpath(__file__))}/dietApp.log"
 
-logHandler = RotatingFileHandler(logFile, mode="a", maxBytes=200*1024*1024, backupCount=1, encoding="utf-8")
+logHandler = RotatingFileHandler(logFile, mode="a", maxBytes=200 * 1024 * 1024, backupCount=1, encoding="utf-8")
 logHandler.setLevel(INFO)
 logHandler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(funcName)s(%(lineno)d) - %(message)s"))
 
@@ -23,7 +22,6 @@ app_log = logging.getLogger('root')
 app_log.setLevel(logging.INFO)
 if not app_log.hasHandlers():
     app_log.addHandler(logHandler)
-
 
 ## Initialize the Database
 conn = sqlite3.connect('database.db', check_same_thread=False)
@@ -60,6 +58,7 @@ items = [
     {"id": '007', "name": "Banana", "calories": 80, "proteins": 1},
 ]
 
+
 def productToJson(product):
     return {
         "barcode": product[0],
@@ -75,9 +74,12 @@ def productToJson(product):
         "salt": product[10],
         "fiber": product[11]
     }
+
+
 def checkExistanceInDatabase(barcode):
     cursor.execute("SELECT * FROM products WHERE barcode = ?", (barcode,))
     return cursor.fetchone()
+
 
 def deleteProductFromDatabase(barcode):
     try:
@@ -86,9 +88,13 @@ def deleteProductFromDatabase(barcode):
         return None
     except Exception as e:
         return e
+
+
 def addProductInDatabase(product):
     cursor.execute("INSERT INTO products VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", tuple(product))
     conn.commit()
+
+
 def getProductFromExternalApi(barcode):
     productJson = requests.get(f"https://world.openfoodfacts.org/api/v0/product/{barcode}.json").json()
     if productJson["status"] == 1:
@@ -97,24 +103,25 @@ def getProductFromExternalApi(barcode):
             quantity = productJson.get("product").get("quantity").replace(" ", "")
             quantity = temp.match(quantity).groups()
             product = [
-            productJson.get("code"),
-            productJson.get("product").get("product_name_fr") + " - " + productJson.get("product").get("brands"),
-            quantity[0],
-            quantity[1],
-            productJson.get("product").get("nutriments").get("energy-kcal_100g"),
-            productJson.get("product").get("nutriments").get("fat_100g"),
-            productJson.get("product").get("nutriments").get("saturated-fat_100g"),
-            productJson.get("product").get("nutriments").get("carbohydrates_100g"),
-            productJson.get("product").get("nutriments").get("sugars_100g"),
-            productJson.get("product").get("nutriments").get("proteins_100g"),
-            productJson.get("product").get("nutriments").get("salt_100g"),
-            productJson.get("product").get("nutriments").get("fiber_100g")]
+                productJson.get("code"),
+                productJson.get("product").get("product_name_fr") + " - " + productJson.get("product").get("brands"),
+                quantity[0],
+                quantity[1],
+                productJson.get("product").get("nutriments").get("energy-kcal_100g"),
+                productJson.get("product").get("nutriments").get("fat_100g"),
+                productJson.get("product").get("nutriments").get("saturated-fat_100g"),
+                productJson.get("product").get("nutriments").get("carbohydrates_100g"),
+                productJson.get("product").get("nutriments").get("sugars_100g"),
+                productJson.get("product").get("nutriments").get("proteins_100g"),
+                productJson.get("product").get("nutriments").get("salt_100g"),
+                productJson.get("product").get("nutriments").get("fiber_100g")]
             return product
         except Exception as e:
             app_log.error(f"Error while getting product from external API: {e}")
             app_log.error("Error on line {}".format(sys.exc_info()[-1].tb_lineno))
     else:
         return None
+
 
 @app.route('/delete-product', methods=['POST'])
 def delete_product():
@@ -124,6 +131,7 @@ def delete_product():
         return {"status": 1}
     else:
         return {"status": response}
+
 
 @app.route('/scan-barcode', methods=['POST'])
 def scan_barcode():
@@ -167,18 +175,20 @@ def scan_barcode():
                 if product[11] == None:
                     errorMess += "Fiber, "
             addProductInDatabase(product)
-            jsonToReturn = {"product": productToJson(product), "fromDb": False, "status": 0 if errorMess != "" else -1, 'code': product[0], "errorMess": errorMess}
+            jsonToReturn = {"product": productToJson(product), "fromDb": False, "status": 0 if errorMess != "" else -1,
+                            'code': product[0], "errorMess": errorMess}
             return jsonToReturn
+
 
 def getAllProductsFromDatabase():
     cursor.execute("SELECT * FROM products")
     products = cursor.fetchall()
     return products
 
+
 @app.route('/scan', methods=['GET', 'POST'])
 def scan():
     return render_template('scan.html')
-
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -192,11 +202,11 @@ def index():
 def my_flask_route_2():
     data = request.get_json()
 
-
     responseData = []
-    for i in range(len(data)-1):
+    for i in range(len(data) - 1):
         responseData.append(productToJson(checkExistanceInDatabase(data[i]['id'])))
     return json.dumps(responseData)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
