@@ -1,167 +1,175 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Meal Creation Assistant</title>
-  <!-- Include Bootstrap CSS and JavaScript files -->
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <title>Meal Creation Assistant</title>
+    <!-- Include Bootstrap CSS and JavaScript files -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-  <style>
-    /* Center the table */
-    .container {
-      max-width: 70%; /* Adjust the maximum width as a percentage of the viewport width */
-      margin: 0 auto; /* Center the container horizontally */
-      padding: 20px; /* Add some padding for spacing */
-      box-sizing: border-box; /* Include padding in the width calculation */
-    }
+    <style>
+        /* Center the table */
+        .container {
+            max-width: 70%; /* Adjust the maximum width as a percentage of the viewport width */
+            margin: 0 auto; /* Center the container horizontally */
+            padding: 20px; /* Add some padding for spacing */
+            box-sizing: border-box; /* Include padding in the width calculation */
+        }
 
-    /*
-    @media (min-width: 768px){
-    .container, .container-md, .container-sm {
-        max-width: 100%;
-    }
-    */
+        /*
+        @media (min-width: 768px){
+        .container, .container-md, .container-sm {
+            max-width: 100%;
+        }
+        */
 
-    .row {
-      margin-right: 0;
-        margin-left: 0;
-    }
+        .row {
+            margin-right: 0;
+            margin-left: 0;
+        }
 
 
-    /* Make the table width responsive */
-    .table-responsive {
-      width: 100%;
-        height: 100%;
-      overflow-x: auto;
-    }
+        /* Make the table width responsive */
+        .table-responsive {
+            width: 100%;
+            height: 100%;
+            overflow-x: auto;
+        }
 
-    /* Style the table header */
-    .thead-dark {
-      background-color: #343a40;
-      color: #fff;
-    }
+        /* Style the table header */
+        .thead-dark {
+            background-color: #343a40;
+            color: #fff;
+        }
 
-    /* Style the table rows */
-    .table td,
-    .table th {
-      border: none;
-    }
+        /* Style the table rows */
+        .table td,
+        .table th {
+            border: none;
+        }
 
-    .table tbody tr:nth-of-type(odd) {
-      background-color: #f9f9f9;
-    }
+        .table tbody tr:nth-of-type(odd) {
+            background-color: #f9f9f9;
+        }
 
-    .table tbody tr:hover {
-      background-color: #f5f5f5;
-    }
+        .table tbody tr:hover {
+            background-color: #f5f5f5;
+        }
 
-    /* Style the checkboxes */
-    input[type="checkbox"] {
-      transform: scale(1.5);
-    }}
-  </style>
+        /* Style the checkboxes */
+        input[type="checkbox"] {
+            transform: scale(1.5);
+        }
+
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
+<div class="container">
     <div class="table-responsive">
-      <table class="table table-striped" id="my-table">
-          <thead>
-          <tr>
-              <th></th>
-              <th>Name</th>
-              <th>Quantity</th>
-              <th>Calories</th>
-              <th>Proteins</th>
-              <th>Fats</th>
-              <th>Carbs</th>
-              <th>Sugars</th>
-          </tr>
-          </thead>
-          <tbody>
+        <table class="table table-striped" id="my-table">
+            <thead>
+            <tr>
+                <th></th>
+                <th>Name</th>
+                <th>Quantity</th>
+                <th>Calories</th>
+                <th>Proteins</th>
+                <th>Fats</th>
+                <th>Carbs</th>
+                <th>Sugars</th>
+            </tr>
+            </thead>
+            <tbody>
 
-          {% for item in items %}
-              <tr>
-                  <td><input type="number" name="quantity" value="0" min="0" max="100"></td>
-                  <td style="display: none">{{ item.barcode }}</td>
-                  <td>{{ item.name }}</td>
-                  <td>{{ item.quantity }}{{ item.measure }}</td>
-                  <td>{{ item.calories }}</td>
-                  <td>{{ item.proteins }}</td>
-                  <td>{{ item.fats }}</td>
-                  <td>{{ item.carbohydrates }}</td>
-                  <td>{{ item.sugars }}</td>
+            {% for item in items %}
+                <tr>
+                    <td><input type="number" name="quantity" value="0" min="0" max="100"></td>
+                    <td style="display: none">{{ item.barcode }}</td>
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.quantity }}{{ item.measure }}</td>
+                    <td>{{ item.calories }}</td>
+                    <td>{{ item.proteins }}</td>
+                    <td>{{ item.fats }}</td>
+                    <td>{{ item.carbohydrates }}</td>
+                    <td>{{ item.sugars }}</td>
 
-              </tr>
-          {% endfor %}
-          </tbody>
-      </table>
-    <div class="row">
-        <div class="col-md-6">
-          <div class="form-group">
-            <label for="calories">Calories Goal:</label>
-            <input type="number" class="form-control" id="calories" name="calories" placeholder="Enter calories goal">
-          </div>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="calories">Calories Goal:</label>
+                    <input type="number" class="form-control" id="calories" name="calories"
+                           placeholder="Enter calories goal">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="proteins">Proteins Goal:</label>
+                    <input type="number" class="form-control" id="proteins" name="proteins"
+                           placeholder="Enter proteins goal">
+                </div>
+            </div>
         </div>
-        <div class="col-md-6">
-          <div class="form-group">
-            <label for="proteins">Proteins Goal:</label>
-            <input type="number" class="form-control" id="proteins" name="proteins" placeholder="Enter proteins goal">
-          </div>
+        <div class="form-group">
+            <button id="submit-button" type="button" class="btn btn-primary">Validate</button>
         </div>
-      </div>
-      <div class="form-group">
-    <button id="submit-button" type="button" class="btn btn-primary">Validate</button>
-      </div>
-      <table class="table table-striped" id="result-table">
-          <thead>
-          <tr>
-              <th></th>
-              <th>Name</th>
-              <th>Quantity</th>
-              <th>Calories</th>
-              <th>Proteins</th>
-              <th>Fats</th>
-              <th>Carbs</th>
-              <th>Sugars</th>
-          </tr>
-          </thead>
-          <tbody>
-          </tbody>
-      </table>
+        <div class="text-center mt-3">
+            <a href="{{ url_for('scan') }}" class="btn btn-primary">Scan New Item</a>
+        </div>
+
+        <table class="table table-striped" id="result-table">
+            <thead>
+            <tr>
+                <th></th>
+                <th>Name</th>
+                <th>Quantity</th>
+                <th>Calories</th>
+                <th>Proteins</th>
+                <th>Fats</th>
+                <th>Carbs</th>
+                <th>Sugars</th>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
     </div>
-  </div>
+</div>
 </body>
 </html>
 
 
 <script>
 
-    function getTableData(){
-         // Get the table element
-          var table = document.getElementById('my-table');
-          // Create an array to hold the table data
-          var data = [];
+    function getTableData() {
+        // Get the table element
+        var table = document.getElementById('my-table');
+        // Create an array to hold the table data
+        var data = [];
 
-          // Loop through each row in the table
-          for (var i = 1; i < table.rows.length; i++) {
-              // Get the checkbox, name, calories, and proteins values for the current row
+        // Loop through each row in the table
+        for (var i = 1; i < table.rows.length; i++) {
+            // Get the checkbox, name, calories, and proteins values for the current row
 
-              var checkbox = table.rows[i].cells[0].querySelector('input[type="number"]');
-              var id = table.rows[i].cells[1].textContent;
+            var checkbox = table.rows[i].cells[0].querySelector('input[type="number"]');
+            var id = table.rows[i].cells[1].textContent;
 
-              // If the checkbox is checked, add the row data to the data array
-              if (checkbox.value > 0) {
-                  data.push({
-                      number: checkbox.value,
-                      id: id,
-                  });
-              }
-          }
-          return data;
+            // If the checkbox is checked, add the row data to the data array
+            if (checkbox.value > 0) {
+                data.push({
+                    number: checkbox.value,
+                    id: id,
+                });
+            }
+        }
+        return data;
     }
 
-    function sendData(){
+    function sendData() {
 
         var tableData = getTableData();
         let calories_goal = document.getElementById("calories").value;
@@ -174,11 +182,11 @@
         var xhr = new XMLHttpRequest();
         xhr.open('POST', '/get-meal-plan');
         xhr.setRequestHeader('Content-Type', 'application/json');
-        xhr.onload = function() {
+        xhr.onload = function () {
             var data = JSON.parse(xhr.responseText);
             populateResultTable(data);
         };
-      xhr.send(JSON.stringify(tableData));
+        xhr.send(JSON.stringify(tableData));
     }
 
     function populateResultTable(result) {
@@ -199,11 +207,10 @@
         }
     }
 
-    document.getElementById('submit-button').addEventListener('click', function(){
+    document.getElementById('submit-button').addEventListener('click', function () {
         console.log('clicked');
         sendData();
-      });
-
+    });
 
 
 </script>
