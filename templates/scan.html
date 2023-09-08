@@ -41,6 +41,10 @@
                 <button class="btn btn-primary" onclick="scanBarcode()">Scan</button>
             </div>
             <div class="text-center mt-3">
+                <input type="text" id="manualBarcode" placeholder="Enter Barcode">
+                <button class="btn btn-primary" onclick="scanManualBarcode()">Scan Manually</button>
+            </div>
+            <div class="text-center mt-3">
                 <button class="btn btn-primary" id="deletebtn" onclick="deleteProduct()">Delete</button>
             </div>
         </div>
@@ -146,6 +150,21 @@
 
         html5QrcodeScanner.render(onScanSuccess);
     }
+
+    function scanManualBarcode() {
+        var manualBarcode = document.getElementById("manualBarcode").value;
+
+        if (manualBarcode.trim() === "") {
+            // Handle empty input, if needed
+            alert("Please enter a barcode.");
+            return;
+        }
+
+        // Call scanBarcode with the manually entered barcode as an argument
+        onScanSuccess(manualBarcode, manualBarcode)
+}
+
+
 
     let html5QrcodeScanner = new Html5QrcodeScanner("reader", {fps: 10, qrbox: {width: 250, height: 250}}, false);
 
