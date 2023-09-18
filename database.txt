@@ -1,5 +1,4 @@
--- we don't know how to generate root <with-no-name> (class Root) :(
-create table products
+create table main.products
 (
     barcode        INTEGER
         primary key,
@@ -16,12 +15,51 @@ create table products
     fiber          INTEGER
 );
 
-create table users
+create table main.sqlite_master
+(
+    type     TEXT,
+    name     TEXT,
+    tbl_name TEXT,
+    rootpage INT,
+    sql      TEXT
+);
+
+create table main.sqlite_sequence
+(
+    name,
+    seq
+);
+
+create table main.users
 (
     id            INTEGER      not null
         primary key autoincrement,
     username      VARCHAR(255) not null,
     email         VARCHAR(255) not null,
     password_hash TEXT         not null
+);
+
+create table main.virtual_fridge
+(
+    virtual_fridge_id integer not null
+        constraint virtual_fridge_pk
+            primary key,
+    user_id           integer not null
+        constraint user_id
+            references main.users
+);
+
+create table main.table_name
+(
+    content_id integer not null
+        constraint content_id
+            primary key autoincrement,
+    fridge_id  integer not null
+        constraint fridge_id
+            references main.virtual_fridge,
+    food_id    integer not null
+        constraint food_id
+            references main.products,
+    quantity   REAL
 );
 
