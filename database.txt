@@ -1,0 +1,27 @@
+-- we don't know how to generate root <with-no-name> (class Root) :(
+create table products
+(
+    barcode        INTEGER
+        primary key,
+    name           TEXT,
+    portion        INTEGER,
+    measure        TEXT,
+    calories       INTEGER,
+    fats           INTEGER,
+    saturated_fats INTEGER,
+    carbohydrates  INTEGER,
+    sugars         INTEGER,
+    proteins       INTEGER,
+    salt           INTEGER,
+    fiber          INTEGER
+);
+
+create table users
+(
+    id            INTEGER      not null
+        primary key autoincrement,
+    username      VARCHAR(255) not null,
+    email         VARCHAR(255) not null,
+    password_hash TEXT         not null
+);
+

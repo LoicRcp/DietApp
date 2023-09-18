@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 import sys
 from logging import INFO
 from logging.handlers import RotatingFileHandler
@@ -7,8 +8,10 @@ from os import path
 import re
 
 import requests
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, session, redirect, url_for
 import sqlite3
+from dotenv import load_dotenv
+from werkzeug.security import generate_password_hash, check_password_hash
 
 ## Initialize the loggers
 
@@ -45,6 +48,8 @@ conn.commit()
 ## Initialize the Flask app
 
 app = Flask(__name__)
+load_dotenv('key.env')
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
 # sample data
 items = [
@@ -123,6 +128,49 @@ def getProductFromExternalApi(barcode):
         return None
 
 
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        mail = request.form['email']
+        password = generate_password_hash(request.form['password'])
+        username = request.form['username']
+
+        cur = conn.cursor()
+        cur.execute("INSERT INTO users(email, username, password_hash) VALUES(?, ?, ?)", (mail, username,  password))
+        conn.commit()
+        cur.close()
+
+        session['logged_in'] = True
+        session['user_email'] = mail
+        session['username'] = username
+
+        return redirect(url_for('index'))
+    return render_template('register.html')
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST' and (session.get('logged_in') is None or session.get('logged_in') is False):
+        mail = request.form['email']
+
+        password = request.form['password']
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM users WHERE email = ?", (mail,))
+        user = cur.fetchone()
+        cur.close()
+        if user:
+            if check_password_hash(user[3], password):
+                session['logged_in'] = True
+                session['user_email'] = mail
+                session['username'] = user[1]
+                return redirect(url_for('index'))
+            else:
+                error = 'Invalid login'
+                return render_template('login.html', error=error)
+        else:
+            error = 'User not found'
+            return render_template('login.html', error=error)
+    return render_template('login.html')
 @app.route('/delete-product', methods=['POST'])
 def delete_product():
     barcode = request.get_json()
@@ -206,6 +254,11 @@ def my_flask_route_2():
     for i in range(len(data) - 1):
         responseData.append(productToJson(checkExistanceInDatabase(data[i]['id'])))
     return json.dumps(responseData)
+
+@app.before_request
+def before_request():
+    if not session.get('logged_in') and request.endpoint != 'login' and request.endpoint != 'register':
+        return redirect(url_for('login'))
 
 
 if __name__ == '__main__':
