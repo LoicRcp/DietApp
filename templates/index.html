@@ -237,9 +237,11 @@
         var isClickInside = document.getElementById("my-table").contains(event.target);
         if (isClickInside) {
             var clickedElement = event.target;
-            var barcode = clickedElement.title;
-            navigator.clipboard.writeText(barcode);
-            alert("Barcode copied to clipboard")
+            if (clickedElement.tagName === 'TD') {
+                var barcode = clickedElement.title;
+                navigator.clipboard.writeText(barcode);
+                alert("Barcode copied to clipboard")
+            }
         }
     }, false);
 
