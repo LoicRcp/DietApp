@@ -171,6 +171,13 @@ def login():
             error = 'User not found'
             return render_template('login.html', error=error)
     return render_template('login.html')
+
+@app.route('/logout', methods=['GET'])
+def logout():
+    if session:
+        session.clear()
+    return redirect(url_for('login'))
+
 @app.route('/delete-product', methods=['POST'])
 def delete_product():
     barcode = request.get_json()
