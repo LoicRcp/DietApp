@@ -133,21 +133,26 @@ def createVirtualFridge(user_id):
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    if request.method == 'POST':
+    if request.method == 'POST' and (session.get('logged_in') is None or session.get('logged_in') is False):
         mail = request.form['email']
         password = generate_password_hash(request.form['password'])
         username = request.form['username']
 
-        cur = conn.cursor()
-        cur.execute("INSERT INTO users(email, username, password_hash) VALUES(?, ?, ?)", (mail, username,  password))
-        conn.commit()
-        cur.close()
+        try:
+            cur = conn.cursor()
+            cur.execute("INSERT INTO users(email, username, password_hash) VALUES(?, ?, ?)", (mail, username,  password))
+            conn.commit()
+            cur.close()
+        except Exception as e:
+            return render_template('register.html', error=str(e))
 
         createVirtualFridge(getUserId(mail))
         session['logged_in'] = True
         session['user_email'] = mail
         session['username'] = username
 
+        return redirect(url_for('index'))
+    elif request.method == 'GET' and (session.get('logged_in') is True):
         return redirect(url_for('index'))
     return render_template('register.html')
 
@@ -173,6 +178,8 @@ def login():
         else:
             error = 'User not found'
             return render_template('login.html', error=error)
+    elif request.method == 'GET' and (session.get('logged_in') is True):
+        return redirect(url_for('index'))
     return render_template('login.html')
 
 @app.route('/logout', methods=['GET'])
