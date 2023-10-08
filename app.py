@@ -281,6 +281,20 @@ def add_to_fridge():
     else:
         return {"status": 0}
 
+@app.route('/update-fridge', methods=['POST'])
+def update_fridge():
+    data = request.get_json()
+    fridgeId = getUserFridge(getUserId(session['user_email']))
+    try:
+        for item in data:
+            cursor.execute("UPDATE fridge SET quantity = ? WHERE food_id = ? AND fridge_id = ?", (item['number'], item['id'], fridgeId))
+        conn.commit()
+    except Exception as e:
+        return {"status": str(e)}
+
+    return {"status": 1}
+
+
 @app.route('/scan-barcode', methods=['POST'])
 def scan_barcode():
     barcode = request.get_json()

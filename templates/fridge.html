@@ -103,6 +103,9 @@
             </tbody>
         </table>
         <div class="text-center mt-3">
+            <button id="apply-button" type="button" class="btn btn-primary">Apply Changes</button>
+        </div>
+        <div class="text-center mt-3">
             <a href="{{ url_for('scan') }}" class="btn btn-primary">Scan New Item</a>
         </div>
     </div>
@@ -141,6 +144,25 @@
             }
         }
     }, false);
+
+    function updateFridge() {
+        var data = getTableData();
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/update-fridge', true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send(JSON.stringify(data));
+        xhr.onloadend = function () {
+            var response = JSON.parse(xhr.responseText)
+            if (response['status'] === 1) {
+                alert("Fridge updated successfully");
+            } else {
+                alert("Error updating fridge, error code: " + xhr.status + " " + xhr.statusText + "\n" + response['status']);
+            }
+        };
+    }
+    document.getElementById('apply-button').addEventListener('click', function () {
+        updateFridge();
+    });
 
 
 </script>
