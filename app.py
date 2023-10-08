@@ -1,3 +1,4 @@
+import datetime
 import json
 import logging
 import os
@@ -123,7 +124,7 @@ def productToJson(product):
     return {
         "barcode": product[0],
         "name": product[1],
-        "quantity": product[2],
+        "portion_quantity": product[2],
         "measure": product[3],
         "calories": product[4],
         "fats": product[5],
@@ -159,26 +160,36 @@ def getProductFromExternalApi(barcode):
     productJson = requests.get(f"https://world.openfoodfacts.org/api/v0/product/{barcode}.json").json()
     if productJson["status"] == 1:
         try:
-            temp = re.compile("([0-9]+)([a-zA-Z]+)")
+            temp = re.compile("([0-9]+)([a-zA-ZœŒ]+)")
             quantity = productJson.get("product").get("quantity").replace(" ", "")
             quantity = temp.match(quantity).groups()
+
+            def extract_nutrient(productJson, nutrient_name):
+                nutriments = productJson.get("product").get("nutriments")
+                estimated_nutriments = productJson.get("product").get("nutriments_estimated")
+                return nutriments.get(nutrient_name) if nutriments.get(
+                    nutrient_name) is not None else estimated_nutriments.get(nutrient_name)
+
             product = [
                 productJson.get("code"),
-                productJson.get("product").get("product_name_fr") + " - " + productJson.get("product").get("brands"),
+                productJson.get("product").get("generic_name_fr") + " - " + productJson.get("product").get("brands"),
                 quantity[0],
                 quantity[1],
-                productJson.get("product").get("nutriments").get("energy-kcal_100g"),
-                productJson.get("product").get("nutriments").get("fat_100g"),
-                productJson.get("product").get("nutriments").get("saturated-fat_100g"),
-                productJson.get("product").get("nutriments").get("carbohydrates_100g"),
-                productJson.get("product").get("nutriments").get("sugars_100g"),
-                productJson.get("product").get("nutriments").get("proteins_100g"),
-                productJson.get("product").get("nutriments").get("salt_100g"),
-                productJson.get("product").get("nutriments").get("fiber_100g")]
+
+                extract_nutrient(productJson, "energy-kcal_100g"),
+                extract_nutrient(productJson, "fat_100g"),
+                extract_nutrient(productJson, "saturated-fat_100g"),
+                extract_nutrient(productJson, "carbohydrates_100g"),
+                extract_nutrient(productJson, "sugars_100g"),
+                extract_nutrient(productJson, "proteins_100g"),
+                extract_nutrient(productJson, "salt_100g"),
+                extract_nutrient(productJson, "fiber_100g")
+            ]
             return product
         except Exception as e:
             app_log.error(f"Error while getting product from external API: {e}")
             app_log.error("Error on line {}".format(sys.exc_info()[-1].tb_lineno))
+            raise Exception(f"Error while getting product from external API {e}")
     else:
         return None
 
@@ -304,40 +315,46 @@ def scan_barcode():
                         'code': product[0], "errorMess": None}
         return jsonToReturn
     else:
-        product = getProductFromExternalApi(barcode)
-        if product == None:
+        try:
+            product = getProductFromExternalApi(barcode)
+            if product == None:
+                jsonToReturn = {
+                    "status": 1,
+                }
+            else:
+                errorMess = ""
+                if None in product:
+                    ## C'est DEGEULASSE mais j'ai rien de mieux en tête qui prendrait pas une plombe
+                    if product[1] == None:
+                        errorMess += "Name, "
+                    if product[2] == None:
+                        errorMess += "Quantity, "
+                    if product[3] == None:
+                        errorMess += "Measure, "
+                    if product[4] == None:
+                        errorMess += "Calories, "
+                    if product[5] == None:
+                        errorMess += "Fats, "
+                    if product[6] == None:
+                        errorMess += "Saturated fats, "
+                    if product[7] == None:
+                        errorMess += "Carbohydrates, "
+                    if product[8] == None:
+                        errorMess += "Sugars, "
+                    if product[9] == None:
+                        errorMess += "Proteins, "
+                    if product[10] == None:
+                        errorMess += "Salt, "
+                    if product[11] == None:
+                        errorMess += "Fiber, "
+                addProductInDatabase(product)
+                jsonToReturn = {"product": productToJson(product), "fromDb": False, "status": 0 if errorMess != "" else -1,
+                                'code': product[0], "errorMess": errorMess}
+        except Exception:
             jsonToReturn = {
-                "status": 1,
+                "status": 2,
+                "timestamp": datetime.datetime.now().timestamp(),
             }
-        else:
-            errorMess = ""
-            if None in product:
-                ## C'est DEGEULASSE mais j'ai rien de mieux en tête qui prendrait pas une plombe
-                if product[1] == None:
-                    errorMess += "Name, "
-                if product[2] == None:
-                    errorMess += "Quantity, "
-                if product[3] == None:
-                    errorMess += "Measure, "
-                if product[4] == None:
-                    errorMess += "Calories, "
-                if product[5] == None:
-                    errorMess += "Fats, "
-                if product[6] == None:
-                    errorMess += "Saturated fats, "
-                if product[7] == None:
-                    errorMess += "Carbohydrates, "
-                if product[8] == None:
-                    errorMess += "Sugars, "
-                if product[9] == None:
-                    errorMess += "Proteins, "
-                if product[10] == None:
-                    errorMess += "Salt, "
-                if product[11] == None:
-                    errorMess += "Fiber, "
-            addProductInDatabase(product)
-            jsonToReturn = {"product": productToJson(product), "fromDb": False, "status": 0 if errorMess != "" else -1,
-                            'code': product[0], "errorMess": errorMess}
         return jsonToReturn
 
 

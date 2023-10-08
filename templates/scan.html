@@ -121,6 +121,11 @@
                 let errorElem = document.getElementById("informations");
                 errorElem.style.display = "block";
                 errorElem.innerHTML = "Le produit n'as pas été trouvé. Vous pouvez l'ajouter en cliquant sur le lien suivant: <a href='https://fr.openfoodfacts.org/contribuer'>Ajouter un produit</a>";
+            } else if (result['status'] === 2){
+                let errorElem = document.getElementById("informations");
+
+                errorElem.style.display = "block";
+                errorElem.innerHTML = "Une erreur est survenue, contactez un administrateur avec le code suivant: " + result['timestamp'];
             } else {
                 barcode = result['code'];
                 if (result['status'] === 0) {
