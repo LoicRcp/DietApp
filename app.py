@@ -391,10 +391,23 @@ def index():
 @app.route('/get-meal-plan', methods=['POST'])
 def my_flask_route_2():
     data = request.get_json()
-
     responseData = []
     for i in range(len(data) - 1):
-        responseData.append(productToJson(checkExistanceInDatabase(data[i]['id'])))
+        productJson = productToJson(checkExistanceInDatabase(data[i]['id']))
+        productJson.pop('fats', None)
+        productJson.pop('saturated_fats', None)
+        productJson.pop('carbohydrates', None)
+        productJson.pop('sugars', None)
+        productJson.pop('salt', None)
+        productJson.pop('fiber', None)
+        responseData.append(productJson)
+
+    responseData.append({"CaloriesGoal": 1000})
+    responseData.append({"ProteinsGoal": 70})
+
+    with open('data.json', 'w', encoding='utf-8') as f:
+        json.dump(responseData, f, ensure_ascii=False, indent=4)
+
     return json.dumps(responseData)
 
 @app.before_request
