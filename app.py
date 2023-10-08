@@ -127,7 +127,9 @@ def getProductFromExternalApi(barcode):
     else:
         return None
 
-
+def createVirtualFridge(user_id):
+    cursor.execute("INSERT INTO virtual_fridge(user_id) VALUES (?)", (user_id,))
+    conn.commit()
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -141,6 +143,7 @@ def register():
         conn.commit()
         cur.close()
 
+        createVirtualFridge(getUserId(mail))
         session['logged_in'] = True
         session['user_email'] = mail
         session['username'] = username
@@ -187,6 +190,34 @@ def delete_product():
     else:
         return {"status": response}
 
+def getUserId(email):
+    result = cursor.execute("SELECT id FROM users WHERE email = ?", (email,)).fetchone()[0]
+    return result
+
+def getUserFridge(userId):
+    result = cursor.execute("SELECT virtual_fridge_id FROM virtual_fridge WHERE user_id = ?", (userId,)).fetchone()[0]
+    return result
+
+def productInUserFridge(barcode):
+    userId = getUserId(session['user_email'])
+    userFridgeId = getUserFridge(userId)
+    product = cursor.execute("SELECT quantity FROM fridge WHERE fridge_id = ? AND food_id = ?", (userFridgeId, barcode))
+    return product.fetchone()
+
+@app.route('/add-to-fridge', methods=['POST'])
+def add_to_fridge():
+    barcode = request.get_json()
+    product = checkExistanceInDatabase(int(barcode))
+    fridgeId = getUserFridge(getUserId(session['user_email']))
+    if product:
+        if productInUserFridge(int(barcode)):
+            cursor.execute("UPDATE fridge SET quantity = quantity + 1 WHERE food_id = ? AND fridge_id = ?", (barcode, fridgeId))
+        else:
+            cursor.execute("INSERT INTO fridge (fridge_id, food_id, quantity) VALUES (?, ?, ?)", (fridgeId, barcode, 1))
+        conn.commit()
+        return {"status": 1}
+    else:
+        return {"status": 0}
 
 @app.route('/scan-barcode', methods=['POST'])
 def scan_barcode():
@@ -202,7 +233,6 @@ def scan_barcode():
             jsonToReturn = {
                 "status": 1,
             }
-            return jsonToReturn
         else:
             errorMess = ""
             if None in product:
@@ -232,7 +262,7 @@ def scan_barcode():
             addProductInDatabase(product)
             jsonToReturn = {"product": productToJson(product), "fromDb": False, "status": 0 if errorMess != "" else -1,
                             'code': product[0], "errorMess": errorMess}
-            return jsonToReturn
+        return jsonToReturn
 
 
 def getAllProductsFromDatabase():
@@ -240,11 +270,21 @@ def getAllProductsFromDatabase():
     products = cursor.fetchall()
     return products
 
+def getUserProductsFromDatabase(email):
+    userFridge = getUserFridge(getUserId(email))
+    cursor.execute("SELECT p.*, f.quantity FROM products p JOIN fridge f on p.barcode = f.food_id WHERE f.fridge_id = ?", (userFridge,))
+    products = cursor.fetchall()
+    return products
 
 @app.route('/scan', methods=['GET', 'POST'])
 def scan():
     return render_template('scan.html')
 
+@app.route('/fridge', methods=['GET'])
+def fridge():
+    items = getUserProductsFromDatabase(session.get('user_email'))
+    items = [productToJson(item) for item in items]
+    return render_template('fridge.html', items=items)
 
 @app.route("/", methods=["GET", "POST"])
 def index():

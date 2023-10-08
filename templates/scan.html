@@ -48,7 +48,7 @@
                 <button class="btn btn-primary" onclick="scanManualBarcode()">Scan Manually</button>
             </div>
             <div class="text-center mt-3">
-                <button class="btn btn-primary" id="deletebtn" onclick="deleteProduct()">Delete</button>
+                <button class="btn btn-primary" onclick="addToFridge()">Add to my fridge</button>
             </div>
         </div>
         <div id="result" class="result" style="display: none">
@@ -80,6 +80,8 @@
 
     </div>
 </div>
+</body>
+</html>
 
 <!-- Bootstrap Bundle with Popper -->
 <script>
@@ -94,7 +96,6 @@
                 result = JSON.parse(xhr.responseText);
                 if (result['status'] === 1) {
                     document.getElementById("result").style.display = "none";
-                    document.getElementById("deletebtn").style.display = "none";
                     document.getElementById("informations").style.display = "block";
                     document.getElementById("informations").innerHTML = "Le produit a bien été supprimé";
                 } else {
@@ -103,7 +104,6 @@
                 }
             }
             xhr.send(JSON.stringify(barcode));
-
         }
     }
 
@@ -139,18 +139,37 @@
                 document.getElementById("carbs").innerHTML = result['product']['carbohydrates'];
                 document.getElementById("sugars").innerHTML = result['product']['sugars'];
                 document.getElementById("result").style.display = "block";
-                document.getElementById("deletebtn").style.display = "block";
             }
 
         }
         xhr.send(JSON.stringify(decodedText));
     }
 
+    function addToFridge() {
+        if (barcode != null) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/add-to-fridge');
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.onload = function () {
+                result = JSON.parse(xhr.responseText);
+                if (result['status'] === 1) {
+                    document.getElementById("result").style.display = "none";
+                    document.getElementById("informations").style.display = "block";
+                    document.getElementById("informations").innerHTML = "Le produit a bien été ajouté au frigo";
+                }
+                else {
+                    document.getElementById("informations").style.display = "block";
+                    document.getElementById("informations").innerHTML = "Le produit n'a pas pu être ajouté au frigo.";
+                }
+            }
+            xhr.send(JSON.stringify(barcode));
+
+        }
+    }
+
     function scanBarcode() {
         document.getElementById("result").style.display = "none";
         document.getElementById("informations").style.display = "none";
-        document.getElementById("deletebtn").style.display = "none";
-
         html5QrcodeScanner.render(onScanSuccess);
     }
 
@@ -172,6 +191,3 @@
 
 
 </script>
-
-</body>
-</html>

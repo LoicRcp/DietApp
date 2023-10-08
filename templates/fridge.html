@@ -69,10 +69,7 @@
 <body>
 <div class="container">
     <div class="table-responsive">
-        <div class="text-center mt-3">
-            <a href="{{ url_for('logout') }}" class="btn btn-primary">Disconnect</a>
-        </div>
-        <h1 class="text-center">Mon frigo virtuel</h1>
+        <h1 class="text-center">Gérer mon frigo virtuel</h1>
         <table class="table table-striped" id="my-table">
             <thead>
             <tr>
@@ -103,58 +100,11 @@
                     <td>{{ item.sugars }}</td>
                 </tr>
             {% endfor %}
-
             </tbody>
         </table>
-        <h1 class="text-center">Mon Assistant</h1>
-        <div class="row">
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label for="calories">Calories Goal:</label>
-                    <input type="number" class="form-control" id="calories" name="calories"
-                           placeholder="Enter calories goal">
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label for="proteins">Proteins Goal:</label>
-                    <input type="number" class="form-control" id="proteins" name="proteins"
-                           placeholder="Enter proteins goal">
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label for="additionnal_info">Additional Informations: </label>
-                    <input type="text" class="form-control" id="additionnal_info" name="additionnal_info"
-                           placeholder="Enter additionnal info">
-                </div>
-            </div>
-        </div>
-        <div class="form-group">
-            <button id="submit-button" type="button" class="btn btn-primary">Validate</button>
-        </div>
         <div class="text-center mt-3">
-            <a href="{{ url_for('fridge') }}" class="btn btn-primary">Manage my fridge</a>
+            <a href="{{ url_for('scan') }}" class="btn btn-primary">Scan New Item</a>
         </div>
-
-        <table class="table table-striped" id="result-table">
-            <thead>
-            <tr>
-                <th></th>
-                <th>Name</th>
-                <th>Quantity</th>
-                <th>Calories</th>
-                <th>Proteins</th>
-                <th>Fats</th>
-                <th>Carbs</th>
-                <th>Sugars</th>
-            </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
     </div>
 </div>
 </body>
@@ -164,19 +114,11 @@
 <script>
 
     function getTableData() {
-        // Get the table element
         var table = document.getElementById('my-table');
-        // Create an array to hold the table data
         var data = [];
-
-        // Loop through each row in the table
         for (var i = 1; i < table.rows.length; i++) {
-            // Get the checkbox, name, calories, and proteins values for the current row
-
             var checkbox = table.rows[i].cells[0].querySelector('input[type="number"]');
             var id = table.rows[i].cells[1].textContent;
-
-            // If the checkbox is checked, add the row data to the data array
             if (checkbox.value > 0) {
                 data.push({
                     number: checkbox.value,
@@ -186,51 +128,6 @@
         }
         return data;
     }
-
-    function sendData() {
-
-        var tableData = getTableData();
-        let calories_goal = document.getElementById("calories").value;
-        let proteins_goal = document.getElementById("proteins").value;
-        let additionnal_info = document.getElementById("additionnal_info").value;
-        tableData.push({
-            calories_goal: calories_goal,
-            proteins_goal: proteins_goal,
-            additionnal_info: additionnal_info
-        });
-        console.log(tableData);
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST', '/get-meal-plan');
-        xhr.setRequestHeader('Content-Type', 'application/json');
-        xhr.onload = function () {
-            var data = JSON.parse(xhr.responseText);
-            populateResultTable(data);
-        };
-        xhr.send(JSON.stringify(tableData));
-    }
-
-    function populateResultTable(result) {
-
-        // For each product in products, create a row in the table "result-table" with the product information
-        for (var i = 0; i < result.length; i++) {
-            console.log(result[i])
-            var table = document.getElementById("result-table");
-            var row = table.insertRow(1);
-            row.insertCell(0).innerHTML = result[i]['number'];
-            row.insertCell(1).innerHTML = result[i]['name'];
-            row.insertCell(2).innerHTML = result[i]['quantity'] + result[i]['measure'];
-            row.insertCell(3).innerHTML = result[i]['calories'];
-            row.insertCell(4).innerHTML = result[i]['proteins'];
-            row.insertCell(5).innerHTML = result[i]['fats'];
-            row.insertCell(6).innerHTML = result[i]['carbohydrates'];
-            row.insertCell(7).innerHTML = result[i]['sugars'];
-        }
-    }
-
-    document.getElementById('submit-button').addEventListener('click', function () {
-        console.log('clicked');
-        sendData();
-    });
 
     // When i click on a row, the barcode is copied to the clipboard
     document.addEventListener('click', function (event) {
