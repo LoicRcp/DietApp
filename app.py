@@ -334,7 +334,7 @@ def getAllProductsFromDatabase():
 
 def getUserProductsFromDatabase(email):
     userFridge = getUserFridge(getUserId(email))
-    cursor.execute("SELECT p.*, f.quantity FROM products p JOIN fridge f on p.barcode = f.food_id WHERE f.fridge_id = ?", (userFridge,))
+    cursor.execute("SELECT p.*, f.quantity AS qty FROM products p JOIN fridge f on p.barcode = f.food_id WHERE f.fridge_id = ?", (userFridge,))
     products = cursor.fetchall()
     return products
 
@@ -345,12 +345,14 @@ def scan():
 @app.route('/fridge', methods=['GET'])
 def fridge():
     items = getUserProductsFromDatabase(session.get('user_email'))
-    items = [productToJson(item) for item in items]
+    items = [(item[:-1], item[-1]) for item in items]
+    items = [(productToJson(item[0]), item[1]) for item in items]
     return render_template('fridge.html', items=items)
 
 @app.route("/", methods=["GET", "POST"])
 def index():
     items = getAllProductsFromDatabase()
+
     items = [productToJson(item) for item in items]
     return render_template("index.html", items=items)
 

@@ -75,20 +75,20 @@
             <tr>
                 <th></th>
                 <th class="item_name" title="Click on item name to copy the barcode">Name</th>
-                <th>Quantity</th>
-                <th>Calories</th>
-                <th>Proteins</th>
-                <th>Fats</th>
-                <th>Carbs</th>
-                <th>Sugars</th>
+                <th>Portions</th>
+                <th>Calories (100/g)</th>
+                <th>Proteins (100/g)</th>
+                <th>Fats (100/g)</th>
+                <th>Carbs (100/g)</th>
+                <th>Sugars (100/g)</th>
             </tr>
             </thead>
             <tbody>
 
-            {% for item in items %}
+            {% for item, qty in items %}
                 <tr>
                     <td><label>
-                        <input type="number" name="quantity" value="0" min="0" max="100">
+                        <input type="number" name="quantity" value={{ qty }} min="0" max="100">
                     </label></td>
                     <td style="display: none">{{ item.barcode }}</td>
                     <td title="{{ item.barcode }}">{{ item.name }}</td>
