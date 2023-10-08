@@ -13,6 +13,61 @@ import sqlite3
 from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash, check_password_hash
 
+#DATABASE STRUCTURE
+"""
+create table products
+(
+    barcode        INTEGER
+        primary key,
+    name           TEXT,
+    portion        INTEGER,
+    measure        TEXT,
+    calories       INTEGER,
+    fats           INTEGER,
+    saturated_fats INTEGER,
+    carbohydrates  INTEGER,
+    sugars         INTEGER,
+    proteins       INTEGER,
+    salt           INTEGER,
+    fiber          INTEGER
+);
+
+create table users
+(
+    id            INTEGER      not null
+        primary key autoincrement,
+    username      VARCHAR(255) not null,
+    email         VARCHAR(255) not null
+        unique,
+    password_hash TEXT         not null
+);
+
+create table virtual_fridge
+(
+    virtual_fridge_id integer not null
+        constraint virtual_fridge_pk
+            primary key,
+    user_id           integer not null
+        constraint user_id
+            references users
+);
+
+create table fridge
+(
+    content_id integer not null
+        constraint content_id
+            primary key autoincrement,
+    fridge_id  integer not null
+        constraint fridge_id
+            references virtual_fridge,
+    food_id    integer not null
+        constraint food_id
+            references products,
+    quantity   REAL
+);
+"""
+
+
 ## Initialize the loggers
 
 logFile = f"{path.dirname(path.realpath(__file__))}/dietApp.log"
