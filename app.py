@@ -356,19 +356,19 @@ def getUserProductsFromDatabase(email):
 def scan():
     return render_template('scan.html')
 
+def process_and_sort_fridge_items(user_email):
+    fridge_items = getUserProductsFromDatabase(user_email)
+    fridge_items = [(item[:-1], item[-1]) for item in fridge_items]
+    fridge_items = [(productToJson(item[0]), item[1]) for item in fridge_items]
+    fridge_items.sort(key=lambda x: x[1])
+    return fridge_items
 @app.route('/fridge', methods=['GET'])
 def fridge():
-    items = getUserProductsFromDatabase(session.get('user_email'))
-    items = [(item[:-1], item[-1]) for item in items]
-    items = [(productToJson(item[0]), item[1]) for item in items]
-    return render_template('fridge.html', items=items)
+    return render_template('fridge.html', items=process_and_sort_fridge_items(session['user_email']))
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    items = getAllProductsFromDatabase()
-
-    items = [productToJson(item) for item in items]
-    return render_template("index.html", items=items)
+    return render_template("index.html", items=process_and_sort_fridge_items(session['user_email']))
 
 
 @app.route('/get-meal-plan', methods=['POST'])
