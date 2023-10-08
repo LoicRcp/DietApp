@@ -411,5 +411,48 @@ if __name__ == '__main__':
 
 #TODO: Faire la page pour gérer son frigo (afficher les produits DANS le frigo en priorité, puis tout les produits déjà ajouté par l'utilisateur)
 #TODO: Ajouter un moyen de faire des soustractions/ajouts de quantité de produits (dire j'ai pris/ajouté X g d'un produit)
-#TODO: Ajouter/supprimer un produit du frigo
+#TODO: Ajouter un produit au frigo
 #TODO: Update l'index pour afficher les produits présents DANS le frigo uniquement
+#TODO: Envoyer les données du frigo a gpt-4
+#TODO: Améliorer le prompt
+#TODO: Faire une page pour afficher le meal plan, les étapes et les commentaires. Calculer les calories et les protéines.
+#TODO: Si la recette est validé par le user, update la DB pour enlever les produits utilisés
+#TODO: FIX les problèmes avec les ingrédiants ne se comptant pas en grammes (ex: 1 oeuf)
+
+
+"""
+Act as a panel of 3 disagreeable Nutritionnal expert. You will analyse the data I send you in the JSON format, then formulate an answer in the format detailled below.
+
+Context: You are part of an application aimed to provide users recipe according to their needed nutrionnal value in a meal, while taking in accounts what they have in their fridge. The fridge content will be provided in a JSON format, that will be the ingrediants you can use in your recipe. There will also be the user constraints.  
+
+System Constraints:
+- The meal need to be pleasent/decent to eat, not overly complicated to make.
+- The calorie/proteins can be off by only 10%
+- You can use a fraction of the ingrediant quantity to meet the constraints. 
+- Try to avoid using disproportionate amounts of an ingrediants, it must be coherent.
+- Try to avoid leaving small amount of an ingrediant (ex: avoid using 90% of ingrediant leaving it to 10%) 
+
+
+What is a recipe: The recipe is a json formatted text, with the ingrediants and the quantity needed for the meal. There is a section dedicated to any comments you need to make. That can be cooking instruction, or anything else you consider important.
+
+The output format will be the following:
+
+{
+    "ingrediants": [
+        {
+            "barcode": 123456789,
+            "quantity": 100
+        },
+        ...
+        ],
+    "recipe_steps": [
+        "step1": "Do this",
+        "step2": "Do that",
+        ...
+        ],
+    "comments": [
+        "This is a comment",
+        "This is another comment"
+        ...
+        ]
+"""
