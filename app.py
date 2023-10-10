@@ -363,9 +363,12 @@ def getAllProductsFromDatabase():
     products = cursor.fetchall()
     return products
 
-def getUserProductsFromDatabase(email):
+def getUserProductsFromDatabase(email, allow_zero=True):
     userFridge = getUserFridge(getUserId(email))
-    cursor.execute("SELECT p.*, f.quantity AS qty FROM products p JOIN fridge f on p.barcode = f.food_id WHERE f.fridge_id = ?", (userFridge,))
+    query = "SELECT p.*, f.quantity AS qty FROM products p JOIN fridge f on p.barcode = f.food_id WHERE f.fridge_id = ?"
+    if not allow_zero:
+        query += " AND f.quantity != 0"
+    cursor.execute(query, (userFridge,))
     products = cursor.fetchall()
     return products
 
@@ -373,8 +376,8 @@ def getUserProductsFromDatabase(email):
 def scan():
     return render_template('scan.html')
 
-def process_and_sort_fridge_items(user_email):
-    fridge_items = getUserProductsFromDatabase(user_email)
+def process_and_sort_fridge_items(user_email, allow_zero=True):
+    fridge_items = getUserProductsFromDatabase(user_email, allow_zero)
     fridge_items = [(item[:-1], item[-1]) for item in fridge_items]
     fridge_items = [(productToJson(item[0]), item[1]) for item in fridge_items]
     fridge_items.sort(key=lambda x: x[1], reverse=True)
@@ -385,7 +388,7 @@ def fridge():
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    return render_template("index.html", items=process_and_sort_fridge_items(session['user_email']))
+    return render_template("index.html", items=process_and_sort_fridge_items(session['user_email'], allow_zero=False))
 
 
 @app.route('/get-meal-plan', methods=['POST'])
