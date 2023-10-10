@@ -425,10 +425,6 @@ if __name__ == '__main__':
 
 
 
-#TODO: Faire la page pour gérer son frigo (afficher les produits DANS le frigo en priorité, puis tout les produits déjà ajouté par l'utilisateur)
-#TODO: Ajouter un moyen de faire des soustractions/ajouts de quantité de produits (dire j'ai pris/ajouté X g d'un produit)
-#TODO: Ajouter un produit au frigo
-#TODO: Update l'index pour afficher les produits présents DANS le frigo uniquement
 #TODO: Envoyer les données du frigo a gpt-4
 #TODO: Améliorer le prompt
 #TODO: Faire une page pour afficher le meal plan, les étapes et les commentaires. Calculer les calories et les protéines.
