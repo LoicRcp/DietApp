@@ -377,7 +377,7 @@ def process_and_sort_fridge_items(user_email):
     fridge_items = getUserProductsFromDatabase(user_email)
     fridge_items = [(item[:-1], item[-1]) for item in fridge_items]
     fridge_items = [(productToJson(item[0]), item[1]) for item in fridge_items]
-    fridge_items.sort(key=lambda x: x[1])
+    fridge_items.sort(key=lambda x: x[1], reverse=True)
     return fridge_items
 @app.route('/fridge', methods=['GET'])
 def fridge():

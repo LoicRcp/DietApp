@@ -53,7 +53,7 @@
         }
 
         .table tbody tr:hover {
-            background-color: #f5f5f5;
+            background-color: #E6E6E6;
         }
 
         /* Style the checkboxes */
@@ -64,6 +64,11 @@
         .item_name {
             cursor: help;
         }
+
+        .zero-quantity {
+            background-color: #C8C8C8; /* Gray background color for zero quantity rows */
+        }
+
     </style>
 </head>
 <body>
@@ -86,13 +91,13 @@
             <tbody>
 
             {% for item, qty in items %}
-                <tr>
+                <tr class="{% if qty == 0 %}zero-quantity{% endif %}">
                     <td><label>
                         <input type="number" name="quantity" value={{ qty }} min="0" max="100">
                     </label></td>
                     <td style="display: none">{{ item.barcode }}</td>
                     <td title="{{ item.barcode }}">{{ item.name }}</td>
-                    <td>{{ item.quantity }}{{ item.measure }}</td>
+                    <td>{{ item.portion_quantity }}{{ item.measure }}</td>
                     <td>{{ item.calories }}</td>
                     <td>{{ item.proteins }}</td>
                     <td>{{ item.fats }}</td>
@@ -122,7 +127,7 @@
         for (var i = 1; i < table.rows.length; i++) {
             var checkbox = table.rows[i].cells[0].querySelector('input[type="number"]');
             var id = table.rows[i].cells[1].textContent;
-            if (checkbox.value > 0) {
+            if (checkbox.value >= 0) {
                 data.push({
                     number: checkbox.value,
                     id: id,
@@ -131,6 +136,8 @@
         }
         return data;
     }
+
+    var fridgeData = getTableData();
 
     // When i click on a row, the barcode is copied to the clipboard
     document.addEventListener('click', function (event) {
@@ -147,10 +154,28 @@
 
     function updateFridge() {
         var data = getTableData();
+
+        // Remove items that have their quantity unchanged
+        var changedItems = data.filter(function (item) {
+            var originalItem = fridgeData.find(function (fridgeItem) {
+                return fridgeItem.id === item.id;
+            });
+
+            return originalItem && originalItem.number !== item.number
+        });
+
+        console.log(changedItems);
+
+        // Check if there are changes to send
+        if (changedItems.length === 0) {
+            alert("No changes to update.");
+            return;
+        }
+
         var xhr = new XMLHttpRequest();
         xhr.open('POST', '/update-fridge', true);
         xhr.setRequestHeader('Content-Type', 'application/json');
-        xhr.send(JSON.stringify(data));
+        xhr.send(JSON.stringify(changedItems));
         xhr.onloadend = function () {
             var response = JSON.parse(xhr.responseText)
             if (response['status'] === 1) {
